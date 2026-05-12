@@ -97,6 +97,7 @@ if __name__ == "__main__":
     # 读取excel的原始数据
     CONFIG=set_argumments([
         (0,'数据源文件夹','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\管网'),
+        (1,'模板','docx',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\管网\'开挖tpl.docx'),
         (0,'照片文件夹','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\管网\照片'),
     ])
     start = time.time()
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     # print(df.info())
     
     # 开启模板分析数据
-    tpl = DocxTemplate(Path(CONFIG['数据源文件夹'])/'开挖tpl.docx')
+    tpl = DocxTemplate(Path(CONFIG['模板']))
     data=make_data_in_list(df.dropna(subset=['管道名称']),tpl)
     
     # 填充并保存内容
