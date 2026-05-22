@@ -2,6 +2,7 @@ import pandas as pd
 from pandas import DataFrame
 from docxtpl import DocxTemplate, InlineImage
 from docx.shared import Pt
+from docx.oxml.ns import qn
 from docx import Document
 from PIL import Image
 from io import BytesIO
@@ -16,9 +17,15 @@ def clean_and_save(doc_path, keyword="待删除段落"):
     doc = Document(doc_path)
     
     for para in reversed(doc.paragraphs):
-        # 删除条件：包含关键字 或 实质为空
+        # 删除条件：包含关键字 
         if keyword in para.text :
             para._element.getparent().remove(para._element)
+
+    if doc.paragraphs:
+        for br in reversed(list(doc.paragraphs[-1]._element.iter(qn('w:br')))):
+            if br.get(qn('w:type')) == 'page':
+                br.getparent().remove(br)
+                break
     
     doc.save(doc_path)
 
@@ -77,15 +84,64 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     large=len(df)
     df=df.fillna('不明')
     data_dict.update({'资料审查_记数':large})
+    text = ';'.join(df['资料审查问题记载'].dropna().unique().astype(str))
+    data_dict.update({'资料审查_资料审查总结':text})
     temp_dict={'资料审查报告':df.to_dict(orient='records')}
+    data_dict.update(temp_dict)
+    #   庭院钢管宏观检查
+    df=dfs['庭院钢管宏观检查']
+    df=df[df['报告编号']==key]
+    text = ';'.join(df['结论'].dropna().unique().astype(str))
+    data_dict.update({'庭院钢管_总结':text})
+    temp_dict={'庭院钢管检查报告':df.to_dict(orient='records')}
+    data_dict.update(temp_dict)
+    #   立管宏观检查
+    df=dfs['立管宏观检查']
+    df=df[df['报告编号']==key]
+    text = ';'.join(df['结论'].dropna().unique().astype(str))
+    data_dict.update({'立管_总结':text})
+    temp_dict={'立管宏观检查':df.to_dict(orient='records')}
+    data_dict.update(temp_dict)
+    #   泄漏检测
+    df=dfs['泄漏检测']
+    df=df[df['报告编号']==key]
+    text = ';'.join(df['检测结果'].dropna().unique().astype(str))
+    data_dict.update({'泄漏_总结':text})
+    group_cols = ['管道名称', '管道材质', '管道位置','检测结果']
+    value_cols = ['检测点位置', '检测时间', '浓度']
+    
+    df = df[group_cols + value_cols].copy()
+
+    # 2. 逐组补齐到7行
+    dfz = []
+    for name, g in df.groupby(group_cols):
+        n = len(g)
+        if n < 7:
+            # name 是元组，如 ('主管A', '碳钢', '地下')
+            # 构造填充行：分组列保留原值，数据列用 '/'
+            padding = pd.DataFrame([
+                dict(zip(group_cols, name)) | {c: '/' for c in value_cols}
+                for _ in range(7 - n)
+            ])
+            g = pd.concat([g, padding], ignore_index=True)
+        dfz.append(g)
+
+    df_filled = pd.concat(dfz, ignore_index=True)
+    df_agg = (
+    df_filled.groupby(group_cols)[value_cols]
+    .apply(lambda x: x.to_dict('records'))
+    .rename('明细')
+    .reset_index()
+    )
+    temp_dict={'泄漏评估报告':df_agg.to_dict(orient='records')}
     data_dict.update(temp_dict)
     return data_dict
 
 if __name__ == "__main__":
     # 读取excel的原始数据
     CONFIG=set_argumments([
-        (2,'数据源文件','xlsx',r'E:\BaiduNetdiskDownload\金牛老改\2026年金牛区评估数据.xlsx'),
-        (2,'模板','docx',r'E:\BaiduNetdiskDownload\金牛老改\模板-成都-金牛.docx'),
+        (2,'数据源文件','xlsx',r'E:\BaiduNetdiskDownload\金牛老改\2026年金牛区评估数据 -出2.xlsx'),
+        (2,'模板','docx',r'E:\BaiduNetdiskDownload\金牛老改\模板-成都-金牛-改.docx'),
         # (0,'照片文件夹','',r'E:\BaiduNetdiskDownload\金牛老改\路由图'),
         (0,'保存文件夹','',r'E:\BaiduNetdiskDownload\金牛老改\输出'),
     ])
@@ -94,7 +150,7 @@ if __name__ == "__main__":
     # print(df.info())
     
     dfs=pd.read_excel(Path(CONFIG['数据源文件']),sheet_name=None)
-    for report_no in dfs['封面']['报告编号'][:1]:
+    for report_no in dfs['封面']['报告编号'][:]:
 
         # 开启模板分析数据
         tpl = DocxTemplate(Path(CONFIG['模板']))
