@@ -140,7 +140,7 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
 if __name__ == "__main__":
     # 读取excel的原始数据
     CONFIG=set_argumments([
-        (2,'数据源文件','xlsx',r'E:\BaiduNetdiskDownload\金牛老改\2026年金牛区评估数据 -出2.xlsx'),
+        (2,'数据源文件','xlsx',r'E:\BaiduNetdiskDownload\金牛老改\2026年金牛区评估数据-0523.xlsx'),
         (2,'模板','docx',r'E:\BaiduNetdiskDownload\金牛老改\模板-成都-金牛-改.docx'),
         # (0,'照片文件夹','',r'E:\BaiduNetdiskDownload\金牛老改\路由图'),
         (0,'保存文件夹','',r'E:\BaiduNetdiskDownload\金牛老改\输出'),
