@@ -83,6 +83,7 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     df=df[df['报告编号']==key]
     large=len(df)
     df=df.fillna('不明')
+    df['竣工验收日期']=df['竣工验收日期'].apply(lambda x: x.strftime('%Y年%m月%d日') if isinstance(x, pd.Timestamp) else x)
     data_dict.update({'资料审查_记数':large})
     text = ';'.join(df['资料审查问题记载'].dropna().unique().astype(str))
     data_dict.update({'资料审查_资料审查总结':text})
@@ -96,15 +97,16 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     temp_dict={'庭院钢管检查报告':df.to_dict(orient='records')}
     data_dict.update(temp_dict)
     #   立管宏观检查
-    df=dfs['立管宏观检查']
-    df=df[df['报告编号']==key]
-    text = ';'.join(df['结论'].dropna().unique().astype(str))
-    data_dict.update({'立管_总结':text})
-    temp_dict={'立管宏观检查':df.to_dict(orient='records')}
-    data_dict.update(temp_dict)
+    # df=dfs['立管宏观检查']
+    # df=df[df['报告编号']==key]
+    # text = ';'.join(df['结论'].dropna().unique().astype(str))
+    # data_dict.update({'立管_总结':text})
+    # temp_dict={'立管宏观检查':df.to_dict(orient='records')}
+    # data_dict.update(temp_dict)
     #   泄漏检测
     df=dfs['泄漏检测']
     df=df[df['报告编号']==key]
+    df['检测时间']=df['检测时间'].apply(lambda x: x.strftime('%Y年%m月') if isinstance(x, pd.Timestamp) else x)
     text = ';'.join(df['检测结果'].dropna().unique().astype(str))
     data_dict.update({'泄漏_总结':text})
     group_cols = ['管道名称', '管道材质', '管道位置','检测结果']
@@ -140,7 +142,7 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
 if __name__ == "__main__":
     # 读取excel的原始数据
     CONFIG=set_argumments([
-        (2,'数据源文件','xlsx',r'E:\BaiduNetdiskDownload\金牛老改\2026年金牛区评估数据-0523.xlsx'),
+        (2,'数据源文件','xlsx',r'E:\BaiduNetdiskDownload\金牛老改\2025年金牛区评估数据.xlsx'),
         (2,'模板','docx',r'E:\BaiduNetdiskDownload\金牛老改\模板-成都-金牛-改.docx'),
         # (0,'照片文件夹','',r'E:\BaiduNetdiskDownload\金牛老改\路由图'),
         (0,'保存文件夹','',r'E:\BaiduNetdiskDownload\金牛老改\输出'),
