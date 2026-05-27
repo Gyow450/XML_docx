@@ -6,7 +6,7 @@ from docx import Document
 from PIL import Image
 from io import BytesIO
 from pathlib import Path
-import time
+import time,json
 from src.LOG_DATA_STEEL import LOG_DICT
 from src.interraction_terminal import set_argumments
 
@@ -61,7 +61,7 @@ def make_data_in_list(df:DataFrame,tpl)->list:
     df['检验结论']='防腐层外观评定为'+df['防腐层破损情况描述'].str.split('（').str[-1].str.replace('）','')
     df['防腐层破损情况描述']=df['防腐层破损情况描述'].str.split('（').str[0]
     cols_fcs=[f'FC1L{n}' for n in [0,3,6,9]]+[f'C1L{n}' for n in [0,3,6,9]]
-    df[cols_fcs]=df[cols_fcs].map(lambda x:f"{x:.2f}" if isinstance(x,float) else x)
+    df[cols_fcs]=df[cols_fcs].map(lambda x:f"{x:.3f}" if isinstance(x,float) else x)
     df['探坑编号']=df['探坑编号'].fillna('1#')
     df['环境条件']=df['环境条件'].fillna('晴')
     #   开挖图片处理
@@ -95,13 +95,16 @@ def make_data_in_list(df:DataFrame,tpl)->list:
 
 if __name__ == "__main__":
     # 读取excel的原始数据
+    with open('local_setting.json', 'r', encoding='utf-8') as f:
+        data:dict[str,str] = json.load(f)
+    r_path=data['root_path']
     CONFIG=set_argumments([
-        (0,'数据源文件夹','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\管网'),
-        (1,'模板','docx',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\管网\'开挖tpl.docx'),
-        (0,'照片文件夹','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\管网\照片'),
+        (0,'数据源文件夹','',f'{r_path}'),
+        (2,'模板','docx',f'{r_path}\开挖tpl电子签.docx'),
+        (0,'照片文件夹','',f'{r_path}\照片'),
     ])
     start = time.time()
-    df=pd.read_excel(Path(CONFIG['数据源文件夹'])/'原始数据.xlsx',sheet_name="Sheet1")
+    df=pd.read_excel(Path(CONFIG['数据源文件夹'])/'钢管定期检验数据汇总_钢管开挖检验记录_时间序.xlsx',sheet_name="钢管开挖检验记录")
     # print(df.info())
     
     # 开启模板分析数据
