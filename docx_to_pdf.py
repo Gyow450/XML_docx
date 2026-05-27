@@ -36,8 +36,8 @@ def docx_transform(input_dir:Path|str,output_dir:Path|str)->None:
 
 if __name__ == '__main__':
     base_set={
-        (0,'数据源','',r'E:\BaiduNetdiskDownload\金牛老改\输出'),
-        (0,'保存目标','',r'E:\BaiduNetdiskDownload\金牛老改\输出'),
+        (0,'数据源','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\26金牛老化评估\输出'),
+        (0,'保存目标','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\26金牛老化评估\输出'),
     } 
     SET_DICT = interraction_terminal.set_argumments(base_set)
     INPUT_DIR = Path(SET_DICT['数据源'])

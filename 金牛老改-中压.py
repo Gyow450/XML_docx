@@ -7,8 +7,8 @@ from docx import Document
 from PIL import Image
 from io import BytesIO
 from pathlib import Path
-from datetime import datetime
 import time
+import json
 from src.LOG_DATA_STEEL import LOG_DICT
 from src.interraction_terminal import set_argumments
 
@@ -151,18 +151,21 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
 
 if __name__ == "__main__":
     # 读取excel的原始数据
+    with open('local_setting.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    r_path = data['root_path']
     CONFIG=set_argumments([
-        (2,'数据源文件','xlsx',r'E:\BaiduNetdiskDownload\金牛老改\金牛中压整理后资料.xlsx'),
-        (2,'模板','docx',r'E:\BaiduNetdiskDownload\金牛老改\模板-中压.docx'),
-        # (0,'照片文件夹','',r'E:\BaiduNetdiskDownload\金牛老改\路由图'),
-        (0,'保存文件夹','',r'E:\BaiduNetdiskDownload\金牛老改\输出'),
+        (2,'数据源文件','xlsx',f'{r_path}\金牛中压整理后资料.xlsx'),
+        (2,'模板','docx',f'{r_path}\模板-中压.docx'),
+        # (0,'照片文件夹','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\26金牛老化评估\路由图'),
+        (0,'保存文件夹','',f'{r_path}\输出'),
     ])
     start = time.time()
     # df=pd.read_excel(Path(CONFIG['数据源文件']),sheet_name="Sheet5")
     # print(df.info())
     
     dfs=pd.read_excel(Path(CONFIG['数据源文件']),sheet_name=None)
-    for report_no in dfs['封面']['报告编号'][:]:
+    for report_no in dfs['封面']['报告编号'][:1]:
 
         # 开启模板分析数据
         tpl = DocxTemplate(Path(CONFIG['模板']))

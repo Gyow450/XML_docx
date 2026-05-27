@@ -3,3 +3,4 @@ __pycache__/
 *.pdf
 *.xlsx
 *.csv
+local_setting.json
