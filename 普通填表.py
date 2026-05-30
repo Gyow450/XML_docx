@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime
 import time
 from src.LOG_DATA_STEEL import LOG_DICT
-from src.interraction_terminal import set_argumments
+from src.interraction_terminal import set_local_setting
 
 def clean_and_save(doc_path, keyword="待删除段落"):
     """一轮清理：删除包含关键字的段落"""
@@ -101,13 +101,19 @@ def make_data_in_list(tpl,df:DataFrame=None)->list:
     return data_dict
 
 if __name__ == "__main__":
-    # 读取excel的原始数据
-    CONFIG=set_argumments([
-        (2,'数据源文件','xlsx',r'E:\BaiduNetdiskDownload\管网\清单4-15.xlsx'),
-        (2,'模板','docx',r'E:\BaiduNetdiskDownload\管网\合并过程\附件3：管道路由图.docx'),
-        (0,'照片文件夹','',r'E:\BaiduNetdiskDownload\管网\路由图'),
-        (0,'保存文件夹','',r'E:\BaiduNetdiskDownload\管网'),
-    ])
+   
+    # 预置参数
+    setting_dict={
+        '数据源文件':[2,'xlsx',''],
+        '模板':[2,'docx',''],
+        '照片文件夹':[0,'',''],
+        '保存文件夹':[0,'',''],
+    }
+    
+    # 设置路径等参数，优先读取之前保存的参数
+    script_name=Path(__file__).resolve().stem
+    CONFIG=set_local_setting(script_name,setting_dict)
+    
     start = time.time()
     # df=pd.read_excel(Path(CONFIG['数据源文件']),sheet_name="Sheet5")
     # print(df.info())

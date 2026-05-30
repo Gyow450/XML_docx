@@ -8,7 +8,7 @@ from io import BytesIO
 from pathlib import Path
 import time,json
 from src.LOG_DATA_STEEL import LOG_DICT
-from src.interraction_terminal import set_argumments
+from src.interraction_terminal import set_local_setting
 
 def clean_and_save(doc_path, keyword="待删除段落"):
     """一轮清理：删除包含关键字的段落"""
@@ -94,17 +94,20 @@ def make_data_in_list(df:DataFrame,tpl)->list:
     return data_dict
 
 if __name__ == "__main__":
-    # 读取excel的原始数据
-    with open('local_setting.json', 'r', encoding='utf-8') as f:
-        data:dict[str,str] = json.load(f)
-    r_path=data['root_path']
-    CONFIG=set_argumments([
-        (0,'数据源文件夹','',f'{r_path}'),
-        (2,'模板','docx',f'{r_path}\开挖tpl电子签.docx'),
-        (0,'照片文件夹','',f'{r_path}\照片'),
-    ])
+    # 预置参数
+    setting_dict={
+        '数据源文件夹':[0,'',''],
+        '模板':[2,'docx',''],
+        '照片文件夹':[0,'',''],
+        '保存文件夹':[0,'',''],
+    }
+    
+    # 设置路径等参数，优先读取之前保存的参数
+    script_name=Path(__file__).resolve().stem
+    CONFIG=set_local_setting(script_name,setting_dict)
+    
     start = time.time()
-    df=pd.read_excel(Path(CONFIG['数据源文件夹'])/'钢管定期检验数据汇总_钢管开挖检验记录_时间序.xlsx',sheet_name="钢管开挖检验记录")
+    df=pd.read_excel(Path(CONFIG['数据源文件'])/'钢管定期检验数据汇总_钢管开挖检验记录_时间序.xlsx',sheet_name="钢管开挖检验记录")
     # print(df.info())
     
     # 开启模板分析数据
