@@ -1,6 +1,7 @@
 """互动窗口，得到参数设置，包括文件夹，文件名，其他控制参数等
 类型码：0-文件夹，1-保存文件，2-打开文件，3-布尔，4-字符串"""
-
+import json
+from pathlib import Path
 import sys
 import re
 import tkinter as tk
@@ -100,6 +101,28 @@ def set_argumments(anything:list[tuple[int,str,str|bool,str|bool]])->dict[str,st
     tk.Button(root,text='取消',command=on_cancel).grid(row=i,column=j+1)
     root.mainloop()
     return final_dict
+
+def set_local_setting(script_name:str,setting_dict:dict[str,tuple[int,str,str,str|bool]])->dict[str,str|bool]:
+    """设置本地参数，优先读取之前保存的参数"""
+    # script_name=Path(__file__).resolve().stem
+    try:
+        with open('local_setting.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = {}
+    
+    if script_name in data:
+        local_config:dict = data[script_name]   
+        temp_list=[(value[0],key,value[1],value[2]) for key, value in local_config.items()] 
+        f_config:dict[str,str|bool]=set_argumments(temp_list)
+    else:
+        f_config:dict[str,str|bool]=set_argumments([(value[0],key,value[1],value[2]) for key, value in setting_dict.items()] )
+    
+    any_list={key:[setting_dict[key][0],setting_dict[key][1],value] for key, value in f_config.items()}
+    with open('local_setting.json', 'w', encoding='utf-8') as f:
+        json.dump(data|{script_name:any_list}, f, ensure_ascii=False, indent=4)
+    
+    return f_config
 
 if __name__=="__main__":
     a_list=[
