@@ -103,7 +103,12 @@ def set_argumments(anything:list[tuple[int,str,str|bool,str|bool]])->dict[str,st
     return final_dict
 
 def set_local_setting(script_name:str,setting_dict:dict[str,tuple[int,str,str,str|bool]])->dict[str,str|bool]:
-    """设置本地参数，优先读取之前保存的参数"""
+    """
+    设置本地参数，优先读取之前保存的参数。依次为：
+    ①类型码：0-文件夹，1-保存文件，2-打开文件，3-布尔，4-字符串
+    ②扩展名或正则表达式
+    ③初始值
+    """
     # script_name=Path(__file__).resolve().stem
     try:
         with open('local_setting.json', 'r', encoding='utf-8') as f:
