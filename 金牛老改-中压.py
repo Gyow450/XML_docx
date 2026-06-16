@@ -10,7 +10,7 @@ from pathlib import Path
 import time
 import json
 from src.LOG_DATA_STEEL import LOG_DICT
-from src.interraction_terminal import set_argumments
+from src.interraction_terminal import set_local_setting
 
 def clean_and_save(doc_path, keyword="待删除段落"):
     """一轮清理：删除包含关键字的段落"""
@@ -150,28 +150,20 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     return data_dict
 
 if __name__ == "__main__":
-    # 读取excel的原始数据
-    script_name=Path(__file__).resolve().stem
-    with open('local_setting.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    if script_name in data:
-        r_path = data[script_name]['root_path']          
-    else:
-        temp_dict=set_argumments([(0,'根目录','','')])
-        r_path=temp_dict['根目录']
-        in_dict={script_name:{
-            'root_path':r_path
-        }}
-        data.update(in_dict)
-        with open('local_setting.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+    # 预置参数
+    setting_dict={
+        '数据源文件':[2,'xlsx',''],
+        '模板':[2,'docx',''],
+        '照片文件夹':[0,'',''],
+        '保存文件夹':[0,'',''],
+    }
     
-    CONFIG=set_argumments([
-            (2,'数据源文件','xlsx',f'{r_path}\金牛中压整理后资料.xlsx'),
-            (2,'模板','docx',f'{r_path}\模板-中压.docx'),
-            # (0,'照片文件夹','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\26金牛老化评估\路由图'),
-            (0,'保存文件夹','',f'{r_path}\输出'),
-        ])
+    # 设置路径等参数，优先读取之前保存的参数
+    script_name=Path(__file__).resolve().stem
+    CONFIG=set_local_setting(script_name,setting_dict)
+    
+    
+    
     start = time.time()
     # df=pd.read_excel(Path(CONFIG['数据源文件']),sheet_name="Sheet5")
     # print(df.info())
