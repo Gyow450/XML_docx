@@ -60,8 +60,10 @@ def make_data_in_list(df:DataFrame,tpl)->list:
     df['检验情况']=df[['探坑坐标描述','防腐层描述','管道描述']].values.tolist() 
     df['检验结论']='防腐层外观评定为'+df['防腐层破损情况描述'].str.split('（').str[-1].str.replace('）','')
     df['防腐层破损情况描述']=df['防腐层破损情况描述'].str.split('（').str[0]
-    cols_fcs=[f'FC1L{n}' for n in [0,3,6,9]]+[f'C1L{n}' for n in [0,3,6,9]]
+    cols_fcs=[f'FC1L{n}' for n in [0,3,6,9]]
+    cols_cs=[f'C1L{n}' for n in [0,3,6,9]]
     df[cols_fcs]=df[cols_fcs].map(lambda x:f"{x:.3f}" if isinstance(x,float) else x)
+    df[cols_cs]=df[cols_cs].map(lambda x:f"{x:.2f}" if isinstance(x,float) else x)
     df['探坑编号']=df['探坑编号'].fillna('1#')
     df['环境条件']=df['环境条件'].fillna('晴')
     #   开挖图片处理
@@ -95,9 +97,20 @@ def make_data_in_list(df:DataFrame,tpl)->list:
 
 if __name__ == "__main__":
     # 读取excel的原始数据
+    script_name=Path(__file__).resolve().stem
     with open('local_setting.json', 'r', encoding='utf-8') as f:
-        data:dict[str,str] = json.load(f)
-    r_path=data['root_path']
+        data = json.load(f)
+    if script_name in data:
+        r_path = data[script_name]['root_path']          
+    else:
+        temp_dict=set_argumments([(0,'根目录','','')])
+        r_path=temp_dict['根目录']
+        in_dict={script_name:{
+            'root_path':r_path
+        }}
+        data.update(in_dict)
+        with open('local_setting.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
     CONFIG=set_argumments([
         (0,'数据源文件夹','',f'{r_path}'),
         (2,'模板','docx',f'{r_path}\开挖tpl电子签.docx'),

@@ -29,6 +29,11 @@ def docx_transform(input_dir:Path|str,output_dir:Path|str)->None:
         output_path = output_dir/output_file
         # mid_name=name.split('.')[0]
         # output_file = f"{source_path}\\{int(mid_name):03d}.pdf"
+        # 移动到文档的末端
+        selection = word.Selection
+        selection.EndKey(6)  # 6 表示 wdStory，即整个文档
+        # 更新所有域（页码）
+        doc.Fields.Update()
         doc.SaveAs2(str(output_path), FileFormat=17)  
         print(f"文档已保存为：{output_file}")
         doc.Close(SaveChanges=False)
@@ -36,8 +41,8 @@ def docx_transform(input_dir:Path|str,output_dir:Path|str)->None:
 
 if __name__ == '__main__':
     base_set={
-        (0,'数据源','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\26金牛老化评估\输出'),
-        (0,'保存目标','',r'E:\BaiduSyncdisk\成渝特检\模板文件与生成程序\记录、报告生成\钢管\26金牛老化评估\输出'),
+        (0,'数据源','',r'E:\BaiduSyncdisk\成渝特检\老化评估\成都锦江区\输出'),
+        (0,'保存目标','',r'E:\BaiduSyncdisk\成渝特检\老化评估\成都锦江区\输出'),
     } 
     SET_DICT = interraction_terminal.set_argumments(base_set)
     INPUT_DIR = Path(SET_DICT['数据源'])
