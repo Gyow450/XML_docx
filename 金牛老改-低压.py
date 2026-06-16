@@ -59,11 +59,15 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     #   封面
     df=dfs['封面']
     df=df[df['报告编号']==key]
+    df['评估日期']=df['评估日期'].apply(lambda x: x.strftime('%Y年%m月%d日') if isinstance(x, datetime) else x)
     df=df.add_prefix('封面_')
     data_dict.update(df.iloc[0].to_dict())
     #   评估情况表
     df=dfs['评估情况表']
     df=df[df['报告编号']==key]
+    temp_list=['市政管道','庭院管道','立管']
+    for key_word in temp_list:
+        df[key_word]=f"☑{key_word}" if key_word in df['管道类型'].iloc[0] else f"□{key_word}"
     for word in ['立即改造','符合安全运行要求','限期改造','落实安全管控措施，可继续运行']:
         if word=='落实安全管控措施，可继续运行':
             df['落实安全管控措施']=f'☑{word}' if  word in df['评估结果'].iloc[0] else f'□{word}'
@@ -93,27 +97,27 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     df=dfs['庭院钢管宏观检查']
     df=df[df['报告编号']==key]
     text = ';'.join(df['结论'].dropna().unique().astype(str))
-    data_dict.update({'庭院钢管_总结':text})
+    data_dict.update({'庭院钢管_总结':f"庭院管道{text}" if text else "待删除段落"})
     temp_dict={'庭院钢管检查报告':df.to_dict(orient='records')}
     data_dict.update(temp_dict)
     #   立管宏观检查
-    # df=dfs['立管宏观检查']
-    # df=df[df['报告编号']==key]
-    # text = ';'.join(df['结论'].dropna().unique().astype(str))
-    # data_dict.update({'立管_总结':text})
-    # temp_dict={'立管宏观检查':df.to_dict(orient='records')}
-    # data_dict.update(temp_dict)
+    df=dfs['立管宏观检查']
+    df=df[df['报告编号']==key]
+    text = ';'.join(df['结论'].dropna().unique().astype(str))
+    data_dict.update({'立管_总结':f"立管{text}"})
+    temp_dict={'立管宏观检查':df.to_dict(orient='records')}
+    data_dict.update(temp_dict)
     #   泄漏检测
     df=dfs['泄漏检测']
     df=df[df['报告编号']==key]
     df['检测时间']=df['检测时间'].apply(lambda x: x.strftime('%Y年%m月') if isinstance(x, pd.Timestamp) else x)
     text = ';'.join(df['检测结果'].dropna().unique().astype(str))
     data_dict.update({'泄漏_总结':text})
-    group_cols = ['管道名称', '管道材质', '管道位置','检测结果']
+    group_cols = ['管道名称', '管道材质', '管道位置','检测结果','管道规格']
     value_cols = ['检测点位置', '检测时间', '浓度']
     
     df = df[group_cols + value_cols].copy()
-
+    # print(df)
     # 2. 逐组补齐到7行
     dfz = []
     for name, g in df.groupby(group_cols):

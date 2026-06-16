@@ -60,8 +60,10 @@ def make_data_in_list(df:DataFrame,tpl)->list:
     df['检验情况']=df[['探坑坐标描述','防腐层描述','管道描述']].values.tolist() 
     df['检验结论']='防腐层外观评定为'+df['防腐层破损情况描述'].str.split('（').str[-1].str.replace('）','')
     df['防腐层破损情况描述']=df['防腐层破损情况描述'].str.split('（').str[0]
-    cols_fcs=[f'FC1L{n}' for n in [0,3,6,9]]+[f'C1L{n}' for n in [0,3,6,9]]
+    cols_fcs=[f'FC1L{n}' for n in [0,3,6,9]]
+    cols_cs=[f'C1L{n}' for n in [0,3,6,9]]
     df[cols_fcs]=df[cols_fcs].map(lambda x:f"{x:.3f}" if isinstance(x,float) else x)
+    df[cols_cs]=df[cols_cs].map(lambda x:f"{x:.2f}" if isinstance(x,float) else x)
     df['探坑编号']=df['探坑编号'].fillna('1#')
     df['环境条件']=df['环境条件'].fillna('晴')
     #   开挖图片处理
