@@ -8,6 +8,7 @@ from PIL import Image
 from io import BytesIO
 from pathlib import Path
 from datetime import datetime
+import sys
 import time
 from src.LOG_DATA_STEEL import LOG_DICT
 from src.interraction_terminal import set_local_setting
@@ -145,10 +146,10 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
 
 if __name__ == "__main__":
     # 预置参数
+    # 类型码：0-文件夹，1-保存文件，2-打开文件，3-布尔，4-字符串
     setting_dict={
         '数据源文件':[2,'xlsx',''],
         '模板':[2,'docx',''],
-        '照片文件夹':[0,'',''],
         '保存文件夹':[0,'',''],
     }
     
@@ -156,9 +157,10 @@ if __name__ == "__main__":
     script_name=Path(__file__).resolve().stem
     CONFIG=set_local_setting(script_name,setting_dict)
     
+    if CONFIG is None:
+        sys.exit(0)
+    
     start = time.time()
-    # df=pd.read_excel(Path(CONFIG['数据源文件']),sheet_name="Sheet5")
-    # print(df.info())
     
     dfs=pd.read_excel(Path(CONFIG['数据源文件']),sheet_name=None)
     for report_no in dfs['封面']['报告编号'][:]:
