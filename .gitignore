@@ -4,3 +4,4 @@ __pycache__/
 *.xlsx
 *.csv
 local_setting.json
+.vscode/settings.json
