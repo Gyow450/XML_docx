@@ -1,3 +1,9 @@
+from io import BytesIO
+from pathlib import Path
+from datetime import datetime
+import sys
+import time
+
 import pandas as pd
 from pandas import DataFrame
 from docxtpl import DocxTemplate, InlineImage
@@ -5,11 +11,7 @@ from docx.shared import Pt
 from docx.oxml.ns import qn
 from docx import Document
 from PIL import Image
-from io import BytesIO
-from pathlib import Path
-from datetime import datetime
-import sys
-import time
+
 from src.LOG_DATA_STEEL import LOG_DICT
 from src.interraction_terminal import set_local_setting
 
@@ -88,12 +90,15 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     df=df[df['报告编号']==key]
     large=len(df)
     df=df.fillna('不明')
-    df['竣工验收日期']=df['竣工验收日期'].apply(lambda x: x.strftime('%Y年%m月%d日') if isinstance(x, pd.Timestamp) else x)
+    df['竣工验收日期']=df['竣工验收日期'].apply(lambda x: x.strftime('%Y年%m月%d日') if isinstance(x, (pd.Timestamp,datetime)) else x)
+    df['投用日期']=df['投用日期'].apply(lambda x: x.strftime('%Y年%m月%d日') if isinstance(x, (pd.Timestamp,datetime)) else x)
     data_dict.update({'资料审查_记数':large})
     text = ';'.join(df['资料审查问题记载'].dropna().unique().astype(str))
     data_dict.update({'资料审查_资料审查总结':text})
     temp_dict={'资料审查报告':df.to_dict(orient='records')}
+    temp_dict1={'资料审查':df.to_dict(orient='records')}
     data_dict.update(temp_dict)
+    data_dict.update(temp_dict1)
     #   庭院钢管宏观检查
     df=dfs['庭院钢管宏观检查']
     df=df[df['报告编号']==key]
@@ -105,7 +110,7 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     df=dfs['立管宏观检查']
     df=df[df['报告编号']==key]
     text = ';'.join(df['结论'].dropna().unique().astype(str))
-    data_dict.update({'立管_总结':f"立管{text}"})
+    data_dict.update({'立管_总结':f"立管{text}" if text else ''})
     temp_dict={'立管宏观检查':df.to_dict(orient='records')}
     data_dict.update(temp_dict)
     #   泄漏检测
@@ -140,8 +145,26 @@ def make_data_in_list(tpl,df:DataFrame=None,dfs:dict[str,DataFrame]=None,key='')
     .rename('明细')
     .reset_index()
     )
-    temp_dict={'泄漏评估报告':df_agg.to_dict(orient='records')}
+    temp_dict={'泄漏评估':df_agg.to_dict(orient='records')}
     data_dict.update(temp_dict)
+    
+    #   杂散电流
+    df=dfs['杂散电流']
+    df=df[df['报告编号']==key]
+    text = ';'.join(df['结论'].dropna().unique().astype(str))
+    data_dict.update({'杂散电流_总结':text})
+    temp_dict={'杂散电流':df.to_dict(orient='records')}
+    data_dict.update(temp_dict)
+
+    #   阴极保护
+    df=dfs['阴极保护']
+    df=df[df['报告编号']==key]
+    text = ';'.join(df['结论'].dropna().unique().astype(str))
+    data_dict.update({'阴极保护_总结':text})
+    temp_dict={'阴极保护':df.to_dict(orient='records')}
+    data_dict.update(temp_dict)
+
+    
     return data_dict
 
 if __name__ == "__main__":
